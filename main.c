@@ -1,25 +1,23 @@
 #include"lib.h"
-
+//#include <conio.h>
 int main(void) {
-	int op;
+	int op, hash, i, pos;
 	TLista C;
 	Cartao cartao;
 	criar(&C);
-	int hash;
 	do{
     //Exibir menu
-        system("cls");
+  //      system("cls");
         puts("\n\t\t\t\tEDITOR DE LISTAS\n");
         puts("\t1  - EXIBIR LISTA\n \t2  - INSERIR UM ELEMENTO\n \t0  - SAIR");
         printf("\nINFORME SUA OPCAO:\n");
-        scanf("%d", &op);//Escolha da OpÁ„o
+        scanf("%d", &op);//Escolha da Op√ß√£o
 
     	switch(op)
         	{
         		case 1:{
         			exibir(C);
-					break;
-				}
+				}break;
 
 				case 2:{
 					printf("Informe o numero do cartao: ");
@@ -30,17 +28,23 @@ int main(void) {
 
 	                printf("Informe a data de validade do cartao (mm aa): ");
 	                scanf("%d %d", &cartao.dataMes, &cartao.dataAno);
-	                fflush(stdin);
 	                hash = hashing(cartao.numUnico);
 	                inserir(&C, hash, cartao);
-					break;
-				}
-        	// Outra opÁ„o nao oferecida
+
+				}break;
+				 //Op√ß√£o de sair
+    		case 0:
+            {
+    		     printf("ENCERRANDO PROGRAMA");
+    		     return 0;
+    		}break;
+
+        	// Outra op√ß√£o nao oferecida
     		default:
     			puts("OPCAO INCORRETA,TENTAR NOVAMENTE.");break;
 
         }
-	getch();
+//	getch();
     }while(op!=0);
 
   system("PAUSE");
