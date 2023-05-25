@@ -1,52 +1,49 @@
-#include"lib.h"
-//#include <conio.h>
-int main(void) {
-	int op, hash, i, pos;
-	TLista C;
-	Cartao cartao;
-	criar(&C);
-	do{
-    //Exibir menu
-  //      system("cls");
-        puts("\n\t\t\t\tEDITOR DE LISTAS\n");
-        puts("\t1  - EXIBIR LISTA\n \t2  - INSERIR UM ELEMENTO\n \t0  - SAIR");
-        printf("\nINFORME SUA OPCAO:\n");
-        scanf("%d", &op);//Escolha da Opção
+#include "lib.h"
 
-    	switch(op)
-        	{
-        		case 1:{
-        			exibir(C);
-				}break;
+// Tabela que um vetor de ponteiros para listas
 
-				case 2:{
-					printf("Informe o numero do cartao: ");
-	                scanf("%d", &cartao.numUnico);
+int main() {
+    int opcao, num;
+    Cartao *c;
+    inicializarC();
+    Usuario *u;
+    inicializarU();
 
-	                printf("Informe o nome do titular: ");
-	                scanf(" %[^\n]", cartao.nome);
+    do{
+        printf("\t\t\tEditor de listas\n\t0 - Sair\n\t1 - Inserir novo cartao\n\t2 - Inserir novo usuario\n\t3 - Buscar cartao\n\t"
+               "4 - Imprimir tabela de cartoes\n\t5 - Imprimir tabela de usuarios\n");
+        scanf("%d", &opcao);
+        switch(opcao){
+        case 0:
+            printf("Saindo...\n");
+            break;
+        case 1:
+            inserirTabelaC();
+            break;
+        case 2:
+            inserirTabelaU();
+            break;
+        case 3:
+            printf("Qual o numero do cartao a ser buscado? ");
+            scanf("%d", &num);
+            c = buscarCartaoTabela(num);
+            if(c) {
+                printf("\tCartao encontrado! \nNumero do Cartao: %d \nNome: %sData de validade: %d/%d\n", c->numUnico, c->nome, c->dataMes, c->dataAno);
+            }
 
-	                printf("Informe a data de validade do cartao (mm aa): ");
-	                scanf("%d %d", &cartao.dataMes, &cartao.dataAno);
-	                hash = hashing(cartao.numUnico);
-	                inserir(&C, hash, cartao);
-
-				}break;
-				 //Opção de sair
-    		case 0:
-            {
-    		     printf("ENCERRANDO PROGRAMA");
-    		     return 0;
-    		}break;
-
-        	// Outra opção nao oferecida
-    		default:
-    			puts("OPCAO INCORRETA,TENTAR NOVAMENTE.");break;
-
+            else
+                printf("Cartao nao encontrada!\n");
+            break;
+        case 4:
+            imprimirTabelaC();
+            break;
+        case 5:
+            imprimirTabelaU();
+            break;
+        default:
+            printf("Opção Invilida!\n");
         }
-//	getch();
-    }while(op!=0);
+    }while(opcao != 0);
 
-  system("PAUSE");
-  return 0;
+    return 0;
 }
