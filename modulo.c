@@ -1,7 +1,7 @@
 #include "lib.h"
 Clista *tabelaC[MAX];
 Ulista *tabelaU[MAX];
-
+int ProxId = 1;
 // Criar lista vazia retornando seu endereco
 Clista* criarListaC(){
     Clista *c = malloc(sizeof(Clista));
@@ -56,6 +56,7 @@ Usuario criarUsuario(){
     printf("Informe o endereco: ");
     scanf("%*c");
     fgets(u.endereco, 200, stdin);
+    u.tam = 0;
     do{
         printf("Informe o numero do cartao que deseja vincular: ");
         scanf("%i", &n);
@@ -69,6 +70,124 @@ Usuario criarUsuario(){
     }while(u.cartoes[u.tam] == NULL);
     u.tam++;
     return u;
+}
+
+Compra* criarCompra(DadoCompra dado) {
+    Compra* novoNo = (Compra*)malloc(sizeof(Compra));
+    novoNo->dado = dado;
+    novoNo->dado.id = ProxId++;
+    novoNo->fator_b = 0;
+    novoNo->esq = NULL;
+    novoNo->dir = NULL;
+    return novoNo;
+}
+
+
+// Função para fazer a rotação simples à esquerda
+Compra* rotacaoEsquerda(Compra* a) {
+    Compra* novaRaiz = a->dir;
+    a->dir = novaRaiz->esq;
+    novaRaiz->esq = a;
+    atualizarAltura(a);
+    atualizarAltura(novaRaiz);
+    return novaRaiz;
+}
+
+// Função para fazer a rotação simples à direita
+Compra* rotacaoDireita(Compra* a) {
+    Compra* novaRaiz = a->esq;
+    a->esq = novaRaiz->dir;
+    novaRaiz->dir = a;
+    atualizarAltura(a);
+    atualizarAltura(novaRaiz);
+    return novaRaiz;
+}
+
+// Função para fazer a rotação dupla esquerda-direita
+Compra* rotacaoEsquerdaDireita(Compra* a) {
+    a->esq = rotacaoEsquerda(a->esq);
+    return rotacaoDireita(a);
+}
+
+// Função para fazer a rotação dupla direita-esquerda
+Compra* rotacaoDireitaEsquerda(Compra* a) {
+    a->dir = rotacaoDireita(a->dir);
+    return rotacaoEsquerda(a);
+}
+
+Compra* inserirCompra(Compra* a, DadoCompra dado){
+    int num;
+	if(a == NULL){
+        return criarCompra(dado);
+	} else {
+		if(dado.id < a->dado.id){
+			a->esq = inserirCompra(a->esq, dado);
+		}else{
+            a->dir = inserirCompra(a->dir, dado);
+		}
+        int balanceamento = calcula_FB(a);
+     // Casos de balanceamento
+        if (balanceamento > 1) {
+            if (dado.id < a->esq->dado.id)
+                return rotacaoDireita(a);
+            else
+                return rotacaoEsquerdaDireita(a);
+        }
+        if (balanceamento < -1) {
+            if (dado.id > a->dir->dado.id)
+                return rotacaoEsquerda(a);
+            else
+                return rotacaoDireitaEsquerda(a);
+        }
+        return a;
+	}
+}
+
+
+int altura_AVL(Compra* a){
+	int alt_esq = 0, alt_dir = 0;
+	if(a==NULL)
+		return 0;
+	else{
+		alt_esq = altura_AVL(a->esq);
+		alt_dir = altura_AVL(a->dir);
+
+		if(alt_esq > alt_dir)
+			return (1+ alt_esq);
+		else
+			return (1+alt_dir);
+	}
+}
+
+int fatorBalanceamento(Compra* a) {
+    if (a == NULL)
+        return 0;
+    return (altura_AVL(a->esq) - altura_AVL(a->dir));
+}
+/*
+void percorrerEmOrdem(Compra* raiz) {
+    if (raiz != NULL) {
+        percorrerEmOrdem(raiz->esq);
+        printf("ID: %d, Valor: %f", raiz->dado.id, raiz->dado.valor);
+        percorrerEmOrdem(raiz->dir);
+    }
+}*/
+
+
+void imprime(Compra* a){
+    if (a == NULL){
+		return;
+	}
+    printf("%d",a->dado.id);
+
+    if(a->esq != NULL)
+        printf("(E:%d)",a->esq->dado.id);
+    if(a->dir != NULL)
+        printf("(D:%d)",a->dir->dado.id);
+    printf("\n");
+
+    imprime(a->esq);
+    imprime(a->dir);
 }
 
 //hashing
@@ -116,12 +235,31 @@ Cno* buscarNo(int num, Cno *inicio){
     return NULL; //Caso o cartao nao for encontrada
 }
 
+Uno* buscarNoUsu(int num, Uno *inicio){
+    while(inicio != NULL) {
+        if(inicio->usuario.cpf == num)
+            return inicio;
+        else
+            inicio = inicio->proximo;
+    }
+    return NULL; //Caso o cartao nao for encontrada
+}
+
 //Buscar um cartao na tabela
 Cartao* buscarCartaoTabela(int num){
     int indice = hashing(num);
     Cno *no = buscarNo(num, tabelaC[indice]->inicio);
     if(no)
         return &no->cartao;
+    else
+        return NULL;
+}
+
+Usuario* buscarUsuarioTabela(int num){
+    int indice = hashing(num);
+    Uno *no = buscarNo(num, tabelaU[indice]->inicio);
+    if(no)
+        return &no->usuario;
     else
         return NULL;
 }
@@ -173,4 +311,3 @@ void imprimirTabelaU(){
     }
     printf("\n---------------- FIM Tabela --------------------\n");
 }
-
