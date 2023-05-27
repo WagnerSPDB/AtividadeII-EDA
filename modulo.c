@@ -189,7 +189,7 @@ Usuario* buscarUsuarioTabela(int num){
 void imprimirUsuario(Usuario u){
     printf("\t\t    ^\n\t    Nome: %s\t    CPF: %d\n\t    Endereco: %s", u.nome, u.cpf, u.endereco);
     printf("\tCartoes vinculados: \n");
-    for(int i = 0; i < adc; i++){
+    for(int i = 0; i < u.tam; i++){
         printf("\tNumero: %d, Titular: %s\tData de validade: %d/%d \n", u.cartoes[i]->numUnico, u.cartoes[i]->nome, u.cartoes[i]->dataMes, u.cartoes[i]->dataAno);
     }
 }
