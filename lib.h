@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #define MAX 13
-//Tipo pessoa
 typedef struct cmno Compra;
 
 typedef struct {
@@ -53,34 +52,37 @@ typedef struct cmno{
 } Compra;
 
 
-
+int hashing(int num);
 
 Clista* criarListaC();
-Ulista* criarListaU();
 void inicializarC();
-void inicializarU();
 Cartao criarCartao();
-Usuario criarUsuario();
-int hashing(int num);
 void inserirInicioC(Cartao c, Clista *lista);
-void inserirInicioU(Usuario u, Ulista *lista);
 void inserirTabelaC();
-void inserirTabelaU();
-Compra* criarCompraNo(DadoCompra dado);
-Compra* criarCompra();
-Compra* inserirCompra(Compra* a, DadoCompra dado);
 Cno* buscarNo(int num, Cno *inicio);
-Uno* buscarNoUsu(int num, Uno *inicio);
 Cartao* buscarCartaoTabela(int num);
-Usuario* buscarUsuarioTabela(int num);
 void imprimirCartao(Cartao c);
 void imprimirListaC(Cno *inicio);
 void imprimirTabelaC();
+
+Ulista* criarListaU();
+void inicializarU();
+Usuario criarUsuario();
+void inserirInicioU(Usuario u, Ulista *lista);
+void inserirTabelaU();
+Uno* buscarNoUsu(int num, Uno *inicio);
+Usuario* buscarUsuarioTabela(int num);
 void imprimirUsuario(Usuario u);
 void imprimirListaU(Uno *inicio);
 void imprimirTabelaU();
-void imprime(Compra* a);
-void percorrerEmOrdem(Compra* raiz);
+
+void adicionarCompra(Cartao* cartao, DadoCompra dado);
+Compra* criarCompra(Compra *a, DadoCompra dado);
+Compra* buscar(Compra* no, int codigo);
+Compra* buscarCompra(Cartao* cartao, int codigo);
+Compra* criarCompraNo(DadoCompra dado);
+Compra* inserirCompra(Compra* a, DadoCompra dado);
+
 int altura_AVL(Compra* a);
 int calcula_FB(Compra* a);
 Compra* rotacao_simples_esquerda(Compra* a);
@@ -88,3 +90,5 @@ Compra* rotacao_simples_direita(Compra* a);
 Compra* balanceamento(Compra* a);
 Compra *balanceio_direita(Compra *a);
 Compra *balanceio_esquerda(Compra *a);
+void imprimirArvoreCompras(Compra* a);
+void imprimirArvoreComprasDoCartao(int num);
