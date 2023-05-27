@@ -2,6 +2,9 @@
 Clista *tabelaC[MAX];
 Ulista *tabelaU[MAX];
 int ProxId = 1;
+int cont = 0, num;
+
+
 // Criar lista vazia retornando seu endereco
 Clista* criarListaC(){
     Clista *c = malloc(sizeof(Clista));
@@ -41,38 +44,84 @@ Cartao criarCartao(){
     fgets(c.nome, 100, stdin);
     printf("Informe a data de validade do cartao (mm aa): ");
     scanf("%d %d", &c.dataMes, &c.dataAno);
+    c.a = NULL;
     return c;
 }
 
 Usuario criarUsuario(){
     Usuario u;
     Cartao *aux;
-    int n;
+    int n, op = 1;
     printf("Informe o cpf: ");
     scanf("%d", &u.cpf);
     printf("Informe o nome: ");
     scanf("%*c");
     fgets(u.nome, 100, stdin);
     printf("Informe o endereco: ");
-    scanf("%*c");
+    //scanf("%*c");
     fgets(u.endereco, 200, stdin);
     u.tam = 0;
     do{
         printf("Informe o numero do cartao que deseja vincular: ");
         scanf("%i", &n);
         aux = buscarCartaoTabela(n);
-        if(aux != NULL){
-            u.cartoes[u.tam] = aux;
-        }else{
-            printf("Cartão inexistente!");
-            return;
+        u.cartoes[u.tam] = aux;
+        if(aux == NULL){
+            printf("Cartão inexistente!\n");
         }
     }while(u.cartoes[u.tam] == NULL);
-    u.tam++;
+
+    do{
+        printf("Deseja inserir outro cartao? 0 - Nao, 1 - Sim");
+        scanf("%d", &op);
+        u.tam++;
+    }while(op == 1);
     return u;
 }
 
-Compra* criarCompra(DadoCompra dado) {
+Compra* criarCompra(Compra *a, DadoCompra dado){
+    cont = 0;
+    for(int i = 0; i < MAX; i++){
+        if(buscarUsuarioTabela(i) != NULL){
+            cont++;
+        }
+    }
+    if(cont != 0){
+        printf("Informe o valor da compra: ");
+        scanf("%f", &dado.valor);
+        printf("Informe os itens da compra: ");
+        scanf("%*c");
+        fgets(dado.descricao, 200, stdin);
+
+     do{
+        printf("Informe o CPF do usuario que realizou a compra: ");
+        scanf("%d", &num);
+        dado.usuario = buscarUsuarioTabela(num);
+        if(dado.usuario == NULL){
+            printf("Usuario inexistente!\n");
+        }
+    }while(dado.usuario == NULL);
+
+    cont = 0;
+    do{
+        printf("Informe o numero do cartao utilizado na compra: ");
+        scanf("%d", &num);
+        for(int i = 0; i < MAX; i++){
+            if(dado.usuario->cartoes[i]->numUnico == num){
+                 a = inserirCompra(a, dado);
+                 cont++;
+            }else{
+            printf("Esse cartao nao esta vinculado a esse usuario");
+            }
+        }
+    }while(cont == 0);
+    } else {
+        printf("Nao existe nenhum usuario cadastrado!\n");
+        return;
+    }
+}
+
+Compra* criarCompraNo(DadoCompra dado) {
     Compra* novoNo = (Compra*)malloc(sizeof(Compra));
     novoNo->dado = dado;
     novoNo->dado.id = ProxId++;
@@ -82,67 +131,21 @@ Compra* criarCompra(DadoCompra dado) {
     return novoNo;
 }
 
-
-// Função para fazer a rotação simples à esquerda
-Compra* rotacaoEsquerda(Compra* a) {
-    Compra* novaRaiz = a->dir;
-    a->dir = novaRaiz->esq;
-    novaRaiz->esq = a;
-    atualizarAltura(a);
-    atualizarAltura(novaRaiz);
-    return novaRaiz;
-}
-
-// Função para fazer a rotação simples à direita
-Compra* rotacaoDireita(Compra* a) {
-    Compra* novaRaiz = a->esq;
-    a->esq = novaRaiz->dir;
-    novaRaiz->dir = a;
-    atualizarAltura(a);
-    atualizarAltura(novaRaiz);
-    return novaRaiz;
-}
-
-// Função para fazer a rotação dupla esquerda-direita
-Compra* rotacaoEsquerdaDireita(Compra* a) {
-    a->esq = rotacaoEsquerda(a->esq);
-    return rotacaoDireita(a);
-}
-
-// Função para fazer a rotação dupla direita-esquerda
-Compra* rotacaoDireitaEsquerda(Compra* a) {
-    a->dir = rotacaoDireita(a->dir);
-    return rotacaoEsquerda(a);
-}
-
 Compra* inserirCompra(Compra* a, DadoCompra dado){
     int num;
 	if(a == NULL){
-        return criarCompra(dado);
+        return criarCompraNo(dado);
 	} else {
 		if(dado.id < a->dado.id){
 			a->esq = inserirCompra(a->esq, dado);
+			a = balanceamento(a);
 		}else{
             a->dir = inserirCompra(a->dir, dado);
+            a = balanceamento(a);
 		}
-        int balanceamento = calcula_FB(a);
-     // Casos de balanceamento
-        if (balanceamento > 1) {
-            if (dado.id < a->esq->dado.id)
-                return rotacaoDireita(a);
-            else
-                return rotacaoEsquerdaDireita(a);
-        }
-        if (balanceamento < -1) {
-            if (dado.id > a->dir->dado.id)
-                return rotacaoEsquerda(a);
-            else
-                return rotacaoDireitaEsquerda(a);
-        }
         return a;
 	}
 }
-
 
 int altura_AVL(Compra* a){
 	int alt_esq = 0, alt_dir = 0;
@@ -159,11 +162,67 @@ int altura_AVL(Compra* a){
 	}
 }
 
-int fatorBalanceamento(Compra* a) {
-    if (a == NULL)
-        return 0;
+int calcula_FB(Compra* a){
     return (altura_AVL(a->esq) - altura_AVL(a->dir));
 }
+
+Compra* rotacao_simples_esquerda(Compra* a){
+    Compra *aux;
+    aux = a->dir;
+    a->dir = aux->esq;
+    aux->esq = a;
+    a = aux;
+    return a;
+}
+
+Compra* rotacao_simples_direita(Compra* a){
+    Compra *aux;
+    aux = a->esq;
+    a->esq = aux->dir;
+    aux->dir = a;
+    a = aux;
+    return a;
+}
+
+Compra* balanceamento(Compra* a){
+    int fator = calcula_FB(a);
+    if(fator > 1){
+        return balanceio_esquerda(a);
+    }
+        else if(fator < -1 ){
+            return balanceio_direita(a);
+        }
+        return a;
+}
+
+Compra *balanceio_direita(Compra *a){
+    int fator = calcula_FB(a->dir);
+    if(fator < 0){
+        return rotacao_simples_esquerda(a);
+    }
+    else if(fator > 0){
+        a->dir = rotacao_simples_direita(a->dir);
+        a = rotacao_simples_esquerda(a);
+        return a;
+    }else{
+        return a;
+    }
+}
+
+Compra *balanceio_esquerda(Compra *a){
+    int fator = calcula_FB(a->esq);
+    if(fator < 0){
+        return rotacao_simples_direita(a);
+    }
+    else if(fator > 0){
+        a->dir = rotacao_simples_esquerda(a->dir);
+        a = rotacao_simples_direita(a);
+        return a;
+    }else{
+        return a;
+    }
+}
+
 /*
 void percorrerEmOrdem(Compra* raiz) {
     if (raiz != NULL) {
@@ -179,6 +238,7 @@ void imprime(Compra* a){
 		return;
 	}
     printf("%d",a->dado.id);
+    printf("%s", a->dado.usuario->nome);
 
     if(a->esq != NULL)
         printf("(E:%d)",a->esq->dado.id);
@@ -219,12 +279,23 @@ void inserirTabelaC(){
 }
 
 void inserirTabelaU(){
-    Usuario usu = criarUsuario();
-    int indice = hashing(usu.cpf);
-    inserirInicioU(usu, tabelaU[indice]);
+    cont = 0;
+    for(int i = 0; i < MAX; i++){
+        if(buscarCartaoTabela(i) != NULL){
+            cont++;
+        }
+    }
+    if(cont != 0){
+        Usuario usu = criarUsuario();
+        int indice = hashing(usu.cpf);
+        inserirInicioU(usu, tabelaU[indice]);
+    } else {
+        printf("Nao existe nenhum cartao cadastrado!\n");
+        return;
+    }
 }
 
-//Buscar elemento na lista
+//Buscar um cartao do vetor de cartoes do usuario
 Cno* buscarNo(int num, Cno *inicio){
     while(inicio != NULL) {
         if(inicio->cartao.numUnico == num)
@@ -311,3 +382,4 @@ void imprimirTabelaU(){
     }
     printf("\n---------------- FIM Tabela --------------------\n");
 }
+
